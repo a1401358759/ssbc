@@ -1,4 +1,5 @@
-#coding: utf8
+# coding: utf8
+
 from django.core.management.base import BaseCommand
 from django import db as ddb
 from search.models import FileList
@@ -8,9 +9,10 @@ import binascii
 
 db = pymongo.MongoClient().dht
 
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        #FileList.objects.all().delete()
+        # FileList.objects.all().delete()
         print 'inputing ...'
         total = db.filelist.count()
         ii = 0
@@ -39,4 +41,3 @@ class Command(BaseCommand):
 
         if ready:
             FileList.objects.bulk_create(ready)
-

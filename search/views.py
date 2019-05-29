@@ -1,17 +1,19 @@
-#coding: utf8
+# coding: utf8
+
 import re
-import hashlib, hmac
+import hashlib
+import hmac
 import sys
 import traceback
 
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
+# from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from django.views.decorators.cache import never_cache
 from django.http import JsonResponse, HttpResponse
 
 from django.conf import settings
-from search.models import Hash, FileList, StatusReport, RecKeywords, ContactEmail, Extra
+from search.models import Hash, StatusReport, RecKeywords, ContactEmail, Extra
 
 
 @cache_page(600)
@@ -37,7 +39,7 @@ def json_info(request):
     try:
         hashes = request.GET['hashes']
         res = Hash.objects.list_with_files(hashes.split('-'))
-        #if request.META.get('HTTP_CF_IPCOUNTRY') == 'US':
+        # if request.META.get('HTTP_CF_IPCOUNTRY') == 'US':
         #    raise Exception('403')
         j = {'result': res, 'ret': 0}
     except:
@@ -72,9 +74,9 @@ def json_helper(request):
 
 def verify(api_key, token, timestamp, signature):
     return signature == hmac.new(
-            key=api_key,
-            msg='{}{}'.format(timestamp, token),
-            digestmod=hashlib.sha256).hexdigest()
+        key=api_key,
+        msg='{}{}'.format(timestamp, token),
+        digestmod=hashlib.sha256).hexdigest()
 
 
 @never_cache
@@ -93,12 +95,10 @@ def post_complaint(request):
         for pk in urls:
             if not Extra.objects.filter(hash_id=int(pk)).first():
                 Extra.objects.create(hash_id=int(pk), status='reviewing')
-    ContactEmail.objects.create(subject=request.POST['subject'],
+    ContactEmail.objects.create(
+        subject=request.POST['subject'],
         mail_from=request.POST['from'],
         text=request.POST['stripped-text'],
         is_complaint=is_complaint
     )
     return HttpResponse('Success')
-
-
-

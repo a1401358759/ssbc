@@ -1,4 +1,5 @@
-#coding: utf8
+# coding: utf8
+
 import os
 import binascii
 
@@ -11,19 +12,23 @@ cats = {
     u'software': u'Softwares',
 }
 
+
 def get_label(name):
     if name in cats:
         return cats[name]
     return u'Others'
 
+
 def get_label_by_crc32(n):
     for k in cats:
-        if binascii.crc32(k)&0xFFFFFFFFL == n:
+        if binascii.crc32(k) & 0xFFFFFFFFL == n:
             return k
     return u'other'
 
+
 def get_extension(name):
     return os.path.splitext(name)[1]
+
 
 def get_category(ext):
     ext = ext + '.'
@@ -40,15 +45,14 @@ def get_category(ext):
             return k
     return u'other'
 
+
 def get_detail(y):
     if y.get('files'):
         y['files'] = [z for z in y['files'] if not z['path'].startswith('_')]
     else:
         y['files'] = [{'path': y['name'], 'length': y['length']}]
-    y['files'].sort(key=lambda z:z['length'], reverse=True)
+    y['files'].sort(key=lambda z: z['length'], reverse=True)
     bigfname = y['files'][0]['path']
     ext = get_extension(bigfname).lower()
     y['category'] = get_category(ext)
     y['extension'] = ext
-
-

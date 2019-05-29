@@ -1,4 +1,6 @@
-from django.conf.urls import include, url
+# coding: utf-8
+
+from django.conf.urls import url
 
 
 urlpatterns = [
@@ -8,5 +10,3 @@ urlpatterns = [
     url(r'^json_helper$', 'search.views.json_helper'),
     url(r'^post_complaint$', 'search.views.post_complaint'),
 ]
-
-

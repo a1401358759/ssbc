@@ -3,6 +3,7 @@ import traceback
 from django.conf import settings
 from time import time
 
+
 class TimerMiddleware:
     def process_request(self, request):
         ua_string = request.META.get('HTTP_USER_AGENT', '')

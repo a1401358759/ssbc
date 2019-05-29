@@ -6,14 +6,14 @@ xiaoxia@xiaoxia.org
 2015.6 Forked CreateChen's Project: https://github.com/CreateChen/simDownloader
 """
 
-import hashlib
+# import hashlib
 import os
 import SimpleXMLRPCServer
 import time
 import datetime
-import traceback
+# import traceback
 import sys
-import json
+# import json
 import socket
 import threading
 from hashlib import sha1
@@ -35,7 +35,7 @@ except:
     lt = None
     print sys.exc_info()[1]
 
-import metautils
+# import metautils
 import simMetadata
 from bencode import bencode, bdecode
 from metadata import save_metadata
@@ -59,7 +59,8 @@ geoip = pygeoip.GeoIP('GeoIP.dat')
 
 
 def is_ip_allowed(ip):
-    return geoip.country_code_by_addr(ip) not in ('CN','TW','HK')
+    return geoip.country_code_by_addr(ip) not in ('CN', 'TW', 'HK')
+
 
 def entropy(length):
     return "".join(chr(randint(0, 255)) for _ in xrange(length))
@@ -78,9 +79,9 @@ def decode_nodes(nodes):
         return n
 
     for i in range(0, length, 26):
-        nid = nodes[i:i+20]
-        ip = inet_ntoa(nodes[i+20:i+24])
-        port = unpack("!H", nodes[i+24:i+26])[0]
+        nid = nodes[i:i + 20]
+        ip = inet_ntoa(nodes[i + 20:i + 24])
+        port = unpack("!H", nodes[i + 24: i + 26])[0]
         n.append((nid, ip, port))
 
     return n
@@ -91,7 +92,7 @@ def timer(t, f):
 
 
 def get_neighbor(target, nid, end=10):
-    return target[:end]+nid[end:]
+    return target[:end] + nid[end:]
 
 
 class KNode(object):
@@ -157,8 +158,10 @@ class DHTClient(Thread):
         nodes = decode_nodes(msg["r"]["nodes"])
         for node in nodes:
             (nid, ip, port) = node
-            if len(nid) != 20: continue
-            if ip == self.bind_ip: continue
+            if len(nid) != 20:
+                continue
+            if ip == self.bind_ip:
+                continue
             n = KNode(nid, ip, port)
             self.nodes.append(n)
 
@@ -182,7 +185,6 @@ class DHTServer(DHTClient):
 
         timer(RE_JOIN_DHT_INTERVAL, self.re_join_DHT)
 
-
     def run(self):
         self.re_join_DHT()
         while True:
@@ -196,7 +198,7 @@ class DHTServer(DHTClient):
     def on_message(self, msg, address):
         try:
             if msg["y"] == "r":
-                if msg["r"].has_key("nodes"):
+                if "nodes" in msg["r"]:
                     self.process_find_node_response(msg, address)
             elif msg["y"] == "q":
                 try:
@@ -210,7 +212,7 @@ class DHTServer(DHTClient):
         try:
             infohash = msg["a"]["info_hash"]
             tid = msg["t"]
-            nid = msg["a"]["id"]
+            # nid = msg["a"]["id"]
             token = infohash[:TOKEN_LENGTH]
             msg = {
                 "t": tid,
@@ -230,11 +232,11 @@ class DHTServer(DHTClient):
         try:
             infohash = msg["a"]["info_hash"]
             token = msg["a"]["token"]
-            nid = msg["a"]["id"]
-            tid = msg["t"]
+            # nid = msg["a"]["id"]
+            # tid = msg["t"]
 
             if infohash[:TOKEN_LENGTH] == token:
-                if msg["a"].has_key("implied_port ") and msg["a"]["implied_port "] != 0:
+                if "implied_port " in msg["a"] and msg["a"]["implied_port "] != 0:
                     port = address[1]
                 else:
                     port = msg["a"]["port"]
@@ -300,7 +302,6 @@ class Master(Thread):
         save_metadata(self.dbcurr, binhash, address, start_time, data)
         self.n_new += 1
 
-
     def run(self):
         self.name = threading.currentThread().getName()
         print self.name, 'started'
@@ -341,12 +342,14 @@ class Master(Thread):
                     self.n_downloading_lt += 1
 
             if self.n_reqs >= 1000:
-                self.dbcurr.execute('INSERT INTO search_statusreport(date,new_hashes,total_requests, valid_requests)  VALUES(%s,%s,%s,%s) ON DUPLICATE KEY UPDATE ' +
+                self.dbcurr.execute(
+                    'INSERT INTO search_statusreport(date,new_hashes,total_requests, valid_requests)  VALUES(%s,%s,%s,%s) ON DUPLICATE KEY UPDATE ' +
                     'total_requests=total_requests+%s, valid_requests=valid_requests+%s, new_hashes=new_hashes+%s',
-                    (date, self.n_new, self.n_reqs, self.n_valid, self.n_reqs, self.n_valid, self.n_new))
+                    (date, self.n_new, self.n_reqs, self.n_valid, self.n_reqs, self.n_valid, self.n_new)
+                )
                 self.dbconn.commit()
-                print '\n', time.ctime(), 'n_reqs', self.n_reqs, 'n_valid', self.n_valid, 'n_new', self.n_new, 'n_queue', self.queue.qsize(), 
-                print 'n_d_pt', self.n_downloading_pt, 'n_d_lt', self.n_downloading_lt, 
+                print '\n', time.ctime(), 'n_reqs', self.n_reqs, 'n_valid', self.n_valid, 'n_new', self.n_new, 'n_queue', self.queue.qsize(),
+                print 'n_d_pt', self.n_downloading_pt, 'n_d_lt', self.n_downloading_lt,
                 self.n_reqs = self.n_valid = self.n_new = 0
 
     def log_announce(self, binhash, address=None):
@@ -386,5 +389,3 @@ if __name__ == "__main__":
     dht = DHTServer(master, "0.0.0.0", 6881, max_node_qsize=200)
     dht.start()
     dht.auto_send_find_node()
-
-

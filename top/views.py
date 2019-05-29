@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from django.http.response import HttpResponse
@@ -30,4 +32,3 @@ def json_log(request):
             return HttpResponse('invalid')
         HashLog.objects.create(hash_id=hash_id, ip=ip)
     return HttpResponse('ok')
-
